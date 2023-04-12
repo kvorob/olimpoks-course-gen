@@ -1,8 +1,8 @@
-# Утилита для конвертации тестов из файлов формата DOCX, TXT в ОЛИМПОКС:Редактор
+# Утилита для конвертации тестов из файлов формата DOCX, XLSX, TXT в ОЛИМПОКС:Редактор
 
-Утилита позволяет сформировать тесты, подготовленные в формате docx, txt, в формате обучающих продуктов ОКС:Курс для последующей загрузки в систему ОЛИМПОКС или ОЛИМПОКС:Предприятие.
+Утилита позволяет сформировать тесты, подготовленные в формате docx, xlsx, txt, в формате обучающих продуктов ОКС:Курс для последующей загрузки в систему ОЛИМПОКС или ОЛИМПОКС:Предприятие.
 
-Файле docx, txt должны быть подготовлены по специальным шаблонам, которые можно найти в папке [src](https://github.com/kvorob/olimpoks-course-gen/tree/main/src).
+Файлы docx, xlsx, txt должны быть подготовлены по специальным шаблонам, которые можно найти в папке [src](https://github.com/kvorob/olimpoks-course-gen/tree/main/src).
 
 ## Как пользоваться данным конвертором
 
@@ -34,16 +34,21 @@ python Course_gen.py
 ```
 [Main]
 # Префикс наименования папки ОКС:Курс
-coursecode = TER 00
+coursecode = ter
+startnumber = 1
+maxchar = 4
 # Шаблон тестов который надо обрабатывать
-# для файлов docx - termika_docx
-# для файлов txt - indigo_txt 
-sourceformat = termika_docx
+# sourceformat = indigo_txt
+#sourceformat = termika_docx
+#sourceformat = termika_xlsx
+sourceformat = termika_docx_2
+# Используется для sourceformat termika_xlsx
+rigthsymbol = V
 # Каталог с исходными файлами для конвертации. Может размещаться в любом месте, например: srcpath = c:\src\
 srcpath = src\
 # Уровень логирования процесса конвертации
-# loglevel = Error, Info, Debug, Warning
-loglevel = Error, Info
+# loglevel = Error,Info,Debug,Warning
+loglevel = Error,Info,Debug
 # Наименование лог-файла 
 logfile = application.log
 ```
