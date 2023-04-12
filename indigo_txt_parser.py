@@ -30,7 +30,7 @@ def create_question(qs,i):
    q_item = []
    q_type = get_question_type(qs[1:len(qs)])
    if q_type == 3 or q_type == 4: return # вопросы 3 и 4 типа пока не поддерживаем
-   q_item = [i,"Текст помощи отсуствует",qs[0]]
+   q_item = [i,"Текст помощи отсуствует",qs[0],"none"]
    a_items = [create_answer(a_item,q_type) for a_item in qs[1:len(qs)]]
    q_item.append(a_items)
 #   print(f"{q_type}: {q_item}")
