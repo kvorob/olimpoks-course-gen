@@ -21,7 +21,7 @@ def check_answer(str):
         i += 1
 
 
-def get_question_and_help_list(str):
+def get_question_and_help_list(str,hcell):
     i = 0
     buf = ''
     hlp = ''
@@ -33,6 +33,13 @@ def get_question_and_help_list(str):
                 hlp += buf + '.'
                 buf = ''
         i += 1
+    if hcell:
+        #Пришла ячейка с текстом помощи. Читаем ее
+        hbuf = ""
+        for pr in hcell.paragraphs:
+            hbuf = hbuf+'<p>'+pr.text+'</p>'
+        print(f'Help:{hbuf}')
+        hlp = hbuf
     return [hlp.strip(), buf.strip()]
 
 
@@ -59,7 +66,7 @@ def get_imag2(run, doc):
     return imageURL
 
 
-def parse_cell_by_bold_attr(qcell, count, qs, doc):
+def parse_cell_by_bold_attr(qcell, hcell, count, qs, doc):
     if qcell._tc.grid_span > 1: return
     i = 0
     q = []
@@ -87,7 +94,7 @@ def parse_cell_by_bold_attr(qcell, count, qs, doc):
                 quest += buf + " "
             i += 1
             # Возвращаем сразу лист в котором первый элемент вопрос, второй помощь
-            qh_lst = get_question_and_help_list(quest)
+            qh_lst = get_question_and_help_list(quest, hcell)
             # Если в вопросе есть только одна картинка упаковываем ее в дополнительное поле
             if len(q_images) == 0 or len(q_images) > 1: q_images = ["none"]
             q = [len(qs) + 1] + qh_lst +q_images
@@ -107,7 +114,10 @@ def tables_info(table_item, col_id, qs, doc):
     for row_idx in range(len(table_item.rows)):
         for col_idx in range(len(table_item.columns)):
             if col_idx == col_id:
-                parse_cell_by_bold_attr(table_item.cell(row_idx, col_idx), count, qs, doc)
+                if len(table_item.columns)>col_idx+1:
+                    parse_cell_by_bold_attr(table_item.cell(row_idx, col_idx), table_item.cell(row_idx, col_idx+1), count, qs, doc)
+                else:
+                    parse_cell_by_bold_attr(table_item.cell(row_idx, col_idx),None, count, qs, doc)
                 count += 1
     return
 
