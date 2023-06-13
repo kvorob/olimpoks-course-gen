@@ -38,7 +38,6 @@ def get_question_and_help_list(str,hcell):
         hbuf = ""
         for pr in hcell.paragraphs:
             hbuf = hbuf+'<p>'+pr.text+'</p>'
-        print(f'Help:{hbuf}')
         hlp = hbuf
     return [hlp.strip(), buf.strip()]
 
