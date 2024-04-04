@@ -46,6 +46,8 @@ sourceformat = termika_docx_2
 rigthsymbol = V
 # Каталог с исходными файлами для конвертации. Может размещаться в любом месте, например: srcpath = c:\src\
 srcpath = src\
+# Ширина картинки к которой будет приведена картинка из загружаемого файла
+image_max_width = 550
 # Уровень логирования процесса конвертации
 # loglevel = Error,Info,Debug,Warning
 loglevel = Error,Info,Debug
