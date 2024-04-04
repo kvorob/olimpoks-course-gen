@@ -1,5 +1,6 @@
 import json, os, os.path, configparser
-import termika_docx_parser, termika_xlsx_parser, indigo_txt_parser, termika_docx_2_parser
+import termika_docx_parser, termika_xlsx_parser, indigo_txt_parser, termika_docx_2_parser, termika_docx_3_parser
+import image_lib
 from logger import TLogger
 
 
@@ -43,6 +44,40 @@ def create_course(data, course_code, course_name, questions):
                              "Scorms": [{"Name": "", "Path": "", "Link": "/1/start.html", "IsResponsive": False}]}]})
     return 0
 
+def create_course_with_topics(data, course_code, course_name, questions):
+    data.update({"Code": course_code,
+                 "EditorVersion": "1.4.9",
+                 "XmlFilename": course_code + ".xml",
+                 "Name": course_name,
+                 "MaterialVersion": 2
+                 })
+    last_topic = questions[0][5]
+    buf_qs = []
+    buf_topic = []
+    for q in questions:
+        if q[5] != last_topic:
+            buf_topic.append({"Name": f"{last_topic}",
+                               "Description": "Описание темы...",
+                               "Questions": buf_qs,
+                               "Documents": [{"Name": "Документ1", "FileName": ""}],
+                               "Scorms": [
+                               {"Name": "", "Path": "", "Link": "/1/start.html", "IsResponsive": False}]})
+            last_topic = q[5]
+            buf_qs=[]
+            buf_qs.append(create_question(q))
+            continue
+        else:
+            buf_qs.append(create_question(q))
+            continue
+
+    buf_topic.append({"Name": f"{last_topic}",
+                             "Description": "Описание темы..",
+                             "Questions": buf_qs,
+                             "Documents": [{"Name": "Документ1", "FileName": ""}],
+                             "Scorms": [{"Name": "", "Path": "", "Link": "/1/start.html", "IsResponsive": False}]})
+    data.update({"Topics":buf_topic})
+    return 0
+
 def make_number(number, max_char):
     st = f"{int(start_number)+int(number)-1}"
     if len(st) >= max_char: return st
@@ -69,6 +104,8 @@ maxchar = int(config.get("Main", "maxchar"))
 source_format = config.get("Main", "sourceformat")
 src_path = config.get("Main", "srcpath")
 rigth_symbol = config.get("Main","rigthsymbol")
+image_max_width = config.get("Main","image_max_width")
+image_lib.image_max_width = image_max_width
 TLogger.LogLevel = config.get("Main","loglevel").split(",")
 TLogger.WriteLog("Info", f"В настройках включен уровень логирования: {TLogger.LogLevel}")
 # docx_parser.parse_table('src//'+file_name, 3, questions)
@@ -106,6 +143,15 @@ for root, dirs, files in os.walk(src_path, topdown=True):
                 termika_docx_2_parser.parse_docx_2(os.path.join(root, fl), questions)
             except Exception as e:
                 TLogger.WriteLog("Error", "Ошибка обработки файла с тестами: {}".format(e))
+        elif fl.endswith('docx') and source_format == "termika_docx_3":
+            counter += 1
+            TLogger.WriteLog("Info", f"Конвертируем файл: {fl} в курс: {course_code + make_number(str(counter),maxchar)}")
+            #termika_docx_parser.parse_table(os.path.join(root, fl), questions)
+            #termika_docx_2_parser.parse_docx_2(os.path.join(root, fl), questions)
+            try:
+                termika_docx_3_parser.parse_docx_3(os.path.join(root, fl), questions)
+            except Exception as e:
+                TLogger.WriteLog("Error", "Ошибка обработки файла с тестами: {}".format(e))
         elif fl.endswith('xlsx') and source_format == "termika_xlsx":
             counter += 1
             TLogger.WriteLog("Info", f"Конвертируем файл: {fl} в курс: {course_code + make_number(str(counter),maxchar)}")
@@ -121,7 +167,10 @@ for root, dirs, files in os.walk(src_path, topdown=True):
 
         try:
            if course_name == "": course_name = fl[0:len(fl) - 4]
-           create_course(data, course_code + make_number(str(counter),maxchar), course_name, questions)
+           if source_format == "termika_xlsx":
+               create_course_with_topics(data, course_code + make_number(str(counter), maxchar), course_name, questions)
+           else:
+               create_course(data, course_code + make_number(str(counter),maxchar), course_name, questions)
         except Exception as e:
             TLogger.WriteLog("Error", "Ошибка создания курса в формате ОЛИМПОКС: {}".format(e))
         dst_folder = os.path.join(os.getcwd(), "dst", course_code + make_number(str(counter),maxchar))
